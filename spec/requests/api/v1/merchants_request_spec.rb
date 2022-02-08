@@ -4,7 +4,6 @@ RSpec.describe 'Merchants API', type: :request do
   describe '#index action' do
     it 'returns a successful status' do
       create_list(:merchant, 3)
-
       get api_v1_merchants_path
 
       expect(response).to have_http_status(200)
@@ -12,9 +11,7 @@ RSpec.describe 'Merchants API', type: :request do
 
     it 'returns a list of all merchants' do
       create_list(:merchant, 3)
-
       get api_v1_merchants_path
-
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       expect(merchants).to be_a(Hash)
@@ -36,7 +33,6 @@ RSpec.describe 'Merchants API', type: :request do
 
     it 'returns an array of data even if no merchants' do
       get api_v1_merchants_path
-
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       expect(merchants).to be_a(Hash)
@@ -47,7 +43,6 @@ RSpec.describe 'Merchants API', type: :request do
     it 'returns an array of data if one merchant' do
       create(:merchant)
       get api_v1_merchants_path
-
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       expect(merchants).to be_a(Hash)
@@ -58,14 +53,47 @@ RSpec.describe 'Merchants API', type: :request do
 
     it 'does not include dependent data' do
       create_list(:merchant, 3)
-
       get api_v1_merchants_path
-
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       merchants[:data].each do |merchant|
         expect(merchant).to_not have_key(:relationships)
       end
+    end
+  end
+
+  describe '#show action' do
+    it 'returns a successful status' do
+      merchant = create(:merchant)
+      get api_v1_merchant_path(merchant)
+
+      expect(response).to have_http_status(200)
+    end
+
+    it 'returns a list of all merchants' do
+      merchant = create(:merchant)
+      get api_v1_merchant_path(merchant)
+      merch_parsed = JSON.parse(response.body, symbolize_names: true)
+      
+      expect(merch_parsed).to be_a(Hash)
+      expect(merch_parsed[:data]).to be_a(Hash)
+      
+      expect(merch_parsed[:data]).to have_key(:id)
+      expect(merch_parsed[:data][:id]).to be_an(String)
+
+      expect(merch_parsed[:data]).to have_key(:type)
+      expect(merch_parsed[:data][:type]).to be_a(String)
+
+      expect(merch_parsed[:data][:attributes]).to have_key(:name)
+      expect(merch_parsed[:data][:attributes][:name]).to be_a(String)
+    end
+
+    it 'does not include dependent data' do
+      merchant = create(:merchant)
+      get api_v1_merchant_path(merchant)
+      merch_parsed = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merch_parsed[:data]).to_not have_key(:relationships)
     end
   end
 end
