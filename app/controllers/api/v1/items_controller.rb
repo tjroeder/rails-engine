@@ -1,4 +1,6 @@
 class Api::V1::ItemsController < ApplicationController
+  before_action :set_item, only: %i[show update]
+
   def index
     @items = Item.all
     json_string = ItemSerializer.new(@items)
@@ -6,7 +8,6 @@ class Api::V1::ItemsController < ApplicationController
   end
   
   def show
-    @item = set_item
     json_string = ItemSerializer.new(@item)
     json_response(json_string)
   end
@@ -17,6 +18,11 @@ class Api::V1::ItemsController < ApplicationController
     json_response(json_string, :created)
   end
 
+  def update
+    @item.update!(item_params)
+    head :no_content
+  end
+
   private
 
   def item_params
@@ -24,6 +30,6 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def set_item
-    Item.find(params[:id])
+    @item = Item.find(params[:id])
   end
 end
