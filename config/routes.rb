@@ -2,10 +2,15 @@ Rails.application.routes.draw do
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :merchants, only: %i[index show] do
-        resources :items, controller: :merchant_items, only: [:index]
+        scope module: :merchants do
+          resources :items, only: [:index]
+        end
       end
-      resources :items, only: %i[index show] do
-        resources :merchant, controller: :items_merchant, only: [:index]
+
+      resources :items, only: %i[index show create] do
+        scope module: :items do
+          resources :merchant, only: [:index]
+        end
       end
     end
   end
