@@ -2,19 +2,28 @@ class Api::V1::ItemsController < ApplicationController
   def index
     @items = Item.all
     json_string = ItemSerializer.new(@items)
-    render json: json_string
+    json_response(json_string)
   end
-
+  
   def show
-    @item = find_item
+    @item = set_item
     json_string = ItemSerializer.new(@item)
-    render json: json_string
+    json_response(json_string)
+  end
+  
+  def create
+    @item = Item.create!(item_params)
+    json_string = ItemSerializer.new(@item)
+    json_response(json_string, :created)
   end
 
   private
 
-  def find_item
-    id = params.permit(:id)[:id]
-    Item.find(id)
+  def item_params
+    params.permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def set_item
+    Item.find(params[:id])
   end
 end
