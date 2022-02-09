@@ -118,19 +118,17 @@ RSpec.describe 'Items API', type: :request do
 
   describe '#create action' do
     let!(:merch) { create(:merchant) }
+    let!(:headers) { { 'CONTENT_TYPE' => 'application/json' } }
     let!(:item_params) { { name: 'Snowboard', description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id } }
     
     it 'returns a successful status if created' do
-      post api_v1_items_path, params: item_params
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: item_params)
       
       expect(response).to have_http_status(201)
     end
     
     it 'returns an newly created item' do
-      post api_v1_items_path, params: item_params
-
-      last_item = Item.last
-      get api_v1_item_path(last_item)
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: item_params)
       item_parsed = json_parse
 
       expect(item_parsed).to be_a(Hash)
@@ -156,31 +154,35 @@ RSpec.describe 'Items API', type: :request do
     end
 
     it 'returns an error if all attributes are missing' do
-      post api_v1_items_path
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: {})
 
       expect(response).to have_http_status(422)
     end
 
     it 'returns an error if missing an attribute' do
-      post api_v1_items_path, params: { description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id }
+      missing_params = { description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id }
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: missing_params)
 
       expect(response).to have_http_status(422)
     end
 
     it 'returns an error status if given attribute with incorrect type' do
-      post api_v1_items_path, params: { name: 'Snowboard', description: 'It is very fast', unit_price: 'price', merchant_id: merch.id }
+      wrong_params = { name: 'Snowboard', description: 'It is very fast', unit_price: 'price', merchant_id: merch.id }
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: wrong_params)
 
       expect(response).to have_http_status(422)
     end
     
     it 'returns an error status if given a non valid merchant id' do
-      post api_v1_items_path, params: { name: 'Snowboard', description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id + 1 }
+      wrong_params = { name: 'Snowboard', description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id + 1 }
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: wrong_params)
   
       expect(response).to have_http_status(422)
     end
     
     it 'returns a valid item even when given unused attribute' do
-      post api_v1_items_path, params: { name: 'Snowboard', description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id, unused: true }
+      wrong_params =  { name: 'Snowboard', description: 'It is very fast', unit_price: 3.50, merchant_id: merch.id, unused: true }
+      post api_v1_items_path, headers: headers, params: JSON.generate(item: wrong_params)
   
       expect(response).to have_http_status(201)
     end
@@ -188,18 +190,20 @@ RSpec.describe 'Items API', type: :request do
 
   describe '#update action' do
     let!(:item) { create(:item) }
+    let!(:headers) { { 'CONTENT_TYPE' => 'application/json' } }
 
-    it 'returns a successful status when updated' do
-      patch api_v1_item_path(item), params: { name: 'New name' }
-      
-      expect(response).to have_http_status(204)
+    it 'returns a successful status when given json update' do
+      item_params = { name: 'New name' }
+      patch api_v1_item_path(item), headers: headers, params: JSON.generate(item: item_params)
+
+      expect(response).to have_http_status(200)
     end
-    
+
     it 'returns an item with an updated attribute' do
       old_attributes = item.attributes
-      patch api_v1_item_path(item), params: { name: 'New name' }
+      item_params = { name: 'New name' }
+      patch api_v1_item_path(item), headers: headers, params: JSON.generate(item: item_params)
 
-      get api_v1_item_path(item)
       item_parsed = json_parse
 
       expect(item_parsed).to be_a(Hash)
@@ -214,7 +218,7 @@ RSpec.describe 'Items API', type: :request do
       expect(item_parsed[:data][:attributes]).to have_key(:name)
       expect(item_parsed[:data][:attributes][:name]).not_to eq(old_attributes['name'])
       expect(item_parsed[:data][:attributes][:name]).to eq('New name')
-      
+
       expect(item_parsed[:data][:attributes]).to have_key(:description)
       expect(item_parsed[:data][:attributes][:description]).to eq(old_attributes['description'])
 
@@ -224,11 +228,68 @@ RSpec.describe 'Items API', type: :request do
       expect(item_parsed[:data][:attributes]).to have_key(:merchant_id)
       expect(item_parsed[:data][:attributes][:merchant_id]).to eq(old_attributes['merchant_id'])
     end
+
+    it 'returns an error status if given attribute with incorrect type' do
+      item_params = { unit_price: 'price' }
+      patch api_v1_item_path(item), headers: headers, params: JSON.generate(item: item_params)
+ 
+      expect(response).to have_http_status(404)
+    end
+
+    it 'returns an error status if given a non valid merchant id' do
+      item_params = { name: 'Snowboard', merchant_id: Merchant.last.id + 1 }
+      patch api_v1_item_path(item), headers: headers, params: JSON.generate(item: item_params)
+      
+      expect(response).to have_http_status(404)
+    end
     
-    it 'returns 204 status if all attributes are missing' do
-      patch api_v1_item_path(item)
+    it 'returns a valid item even when given unused attribute' do
+      old_attributes = item.attributes
+      item_params = {  name: 'New name', unused: true }
+      patch api_v1_item_path(item), headers: headers, params: JSON.generate(item: item_params)
+      
+      expect(response).to have_http_status(200)
+
+      item_parsed = json_parse
+      
+      expect(item_parsed).to be_a(Hash)
+      expect(item_parsed[:data]).to be_a(Hash)
+      
+      expect(item_parsed[:data]).to have_key(:id)
+      expect(item_parsed[:data][:id]).to be_an(String)
+      
+      expect(item_parsed[:data]).to have_key(:type)
+      expect(item_parsed[:data][:type]).to eq('item')
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:name)
+      expect(item_parsed[:data][:attributes][:name]).not_to eq(old_attributes['name'])
+      expect(item_parsed[:data][:attributes][:name]).to eq('New name')
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:description)
+      expect(item_parsed[:data][:attributes][:description]).to eq(old_attributes['description'])
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:unit_price)
+      expect(item_parsed[:data][:attributes][:unit_price]).to eq(old_attributes['unit_price'])
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:merchant_id)
+      expect(item_parsed[:data][:attributes][:merchant_id]).to eq(old_attributes['merchant_id'])
+    end
+  end
+
+  describe '#destroy action' do
+    let!(:item) { create(:item) }
+
+    it 'returns a successful status when deleted' do
+      delete api_v1_item_path(item)
       
       expect(response).to have_http_status(204)
+    end
+    
+    it 'returns no item at previous id when deleted' do
+      delete api_v1_item_path(item)
+      get api_v1_item_path(item)
+
+      expect(response).to have_http_status(404)
     end
     
     it 'returns an error status if given attribute with incorrect type' do
@@ -241,38 +302,6 @@ RSpec.describe 'Items API', type: :request do
       patch api_v1_item_path(item), params: { name: 'Snowboard', merchant_id: Merchant.last.id + 1 }
       
       expect(response).to have_http_status(422)
-    end
-    
-    it 'returns a valid item even when given unused attribute' do
-      old_attributes = item.attributes
-      patch api_v1_item_path(item), params: { name: 'New name', unused: true }
-      
-      expect(response).to have_http_status(204)
-
-      get api_v1_item_path(item)
-      item_parsed = json_parse
-      
-      expect(item_parsed).to be_a(Hash)
-      expect(item_parsed[:data]).to be_a(Hash)
-      
-      expect(item_parsed[:data]).to have_key(:id)
-      expect(item_parsed[:data][:id]).to be_an(String)
-      
-      expect(item_parsed[:data]).to have_key(:type)
-      expect(item_parsed[:data][:type]).to eq('item')
-      
-      expect(item_parsed[:data][:attributes]).to have_key(:name)
-      expect(item_parsed[:data][:attributes][:name]).not_to eq(old_attributes['name'])
-      expect(item_parsed[:data][:attributes][:name]).to eq('New name')
-      
-      expect(item_parsed[:data][:attributes]).to have_key(:description)
-      expect(item_parsed[:data][:attributes][:description]).to eq(old_attributes['description'])
-      
-      expect(item_parsed[:data][:attributes]).to have_key(:unit_price)
-      expect(item_parsed[:data][:attributes][:unit_price]).to eq(old_attributes['unit_price'])
-      
-      expect(item_parsed[:data][:attributes]).to have_key(:merchant_id)
-      expect(item_parsed[:data][:attributes][:merchant_id]).to eq(old_attributes['merchant_id'])
     end
   end
 end
