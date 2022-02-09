@@ -12,7 +12,7 @@ RSpec.describe 'Merchants API', type: :request do
     it 'returns a list of all merchants' do
       create_list(:merchant, 3)
       get api_v1_merchants_path
-      merchants = JSON.parse(response.body, symbolize_names: true)
+      merchants = json_parse
 
       expect(merchants).to be_a(Hash)
       expect(merchants[:data]).to be_a(Array)
@@ -33,7 +33,7 @@ RSpec.describe 'Merchants API', type: :request do
 
     it 'returns an array of data even if no merchants' do
       get api_v1_merchants_path
-      merchants = JSON.parse(response.body, symbolize_names: true)
+      merchants = json_parse
 
       expect(merchants).to be_a(Hash)
       expect(merchants[:data]).to be_a(Array)
@@ -43,7 +43,7 @@ RSpec.describe 'Merchants API', type: :request do
     it 'returns an array of data if one merchant' do
       create(:merchant)
       get api_v1_merchants_path
-      merchants = JSON.parse(response.body, symbolize_names: true)
+      merchants = json_parse
 
       expect(merchants).to be_a(Hash)
       expect(merchants[:data]).to be_a(Array)
@@ -54,7 +54,7 @@ RSpec.describe 'Merchants API', type: :request do
     it 'does not include dependent data' do
       create_list(:merchant, 3)
       get api_v1_merchants_path
-      merchants = JSON.parse(response.body, symbolize_names: true)
+      merchants = json_parse
 
       merchants[:data].each do |merchant|
         expect(merchant).to_not have_key(:relationships)
@@ -63,7 +63,7 @@ RSpec.describe 'Merchants API', type: :request do
   end
 
   describe '#show action' do
-    it 'returns a successful status' do
+    it 'returns a successful status if found' do
       merchant = create(:merchant)
       get api_v1_merchant_path(merchant)
 
@@ -73,7 +73,7 @@ RSpec.describe 'Merchants API', type: :request do
     it 'returns a list of all merchants' do
       merchant = create(:merchant)
       get api_v1_merchant_path(merchant)
-      merch_parsed = JSON.parse(response.body, symbolize_names: true)
+      merch_parsed = json_parse
       
       expect(merch_parsed).to be_a(Hash)
       expect(merch_parsed[:data]).to be_a(Hash)
@@ -91,7 +91,7 @@ RSpec.describe 'Merchants API', type: :request do
     it 'does not include dependent data' do
       merchant = create(:merchant)
       get api_v1_merchant_path(merchant)
-      merch_parsed = JSON.parse(response.body, symbolize_names: true)
+      merch_parsed = json_parse
 
       expect(merch_parsed[:data]).to_not have_key(:relationships)
     end
