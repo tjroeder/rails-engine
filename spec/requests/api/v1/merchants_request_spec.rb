@@ -24,7 +24,6 @@ RSpec.describe 'Merchants API', type: :request do
         expect(merchant[:id]).to be_an(String)
 
         expect(merchant).to have_key(:type)
-        expect(merchant[:type]).to be_a(String)
         expect(merchant[:type]).to eq('merchant')
 
         expect(merchant[:attributes]).to have_key(:name)
@@ -83,7 +82,6 @@ RSpec.describe 'Merchants API', type: :request do
       expect(merch_parsed[:data][:id]).to be_an(String)
 
       expect(merch_parsed[:data]).to have_key(:type)
-      expect(merch_parsed[:data][:type]).to be_a(String)
       expect(merch_parsed[:data][:type]).to eq('merchant')
 
       expect(merch_parsed[:data][:attributes]).to have_key(:name)
