@@ -7,7 +7,7 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :items, only: %i[index show create] do
+      resources :items, only: %i[index show create update] do
         scope module: :items do
           resources :merchant, only: [:index]
         end

@@ -185,4 +185,94 @@ RSpec.describe 'Items API', type: :request do
       expect(response).to have_http_status(201)
     end
   end
+
+  describe '#update action' do
+    let!(:item) { create(:item) }
+
+    it 'returns a successful status when updated' do
+      patch api_v1_item_path(item), params: { name: 'New name' }
+      
+      expect(response).to have_http_status(204)
+    end
+    
+    it 'returns an item with an updated attribute' do
+      old_attributes = item.attributes
+      patch api_v1_item_path(item), params: { name: 'New name' }
+
+      get api_v1_item_path(item)
+      item_parsed = json_parse
+
+      expect(item_parsed).to be_a(Hash)
+      expect(item_parsed[:data]).to be_a(Hash)
+
+      expect(item_parsed[:data]).to have_key(:id)
+      expect(item_parsed[:data][:id]).to be_an(String)
+
+      expect(item_parsed[:data]).to have_key(:type)
+      expect(item_parsed[:data][:type]).to eq('item')
+
+      expect(item_parsed[:data][:attributes]).to have_key(:name)
+      expect(item_parsed[:data][:attributes][:name]).not_to eq(old_attributes['name'])
+      expect(item_parsed[:data][:attributes][:name]).to eq('New name')
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:description)
+      expect(item_parsed[:data][:attributes][:description]).to eq(old_attributes['description'])
+
+      expect(item_parsed[:data][:attributes]).to have_key(:unit_price)
+      expect(item_parsed[:data][:attributes][:unit_price]).to eq(old_attributes['unit_price'])
+
+      expect(item_parsed[:data][:attributes]).to have_key(:merchant_id)
+      expect(item_parsed[:data][:attributes][:merchant_id]).to eq(old_attributes['merchant_id'])
+    end
+    
+    it 'returns 204 status if all attributes are missing' do
+      patch api_v1_item_path(item)
+      
+      expect(response).to have_http_status(204)
+    end
+    
+    it 'returns an error status if given attribute with incorrect type' do
+      patch api_v1_item_path(item), params: { unit_price: 'price' }
+      
+      expect(response).to have_http_status(422)
+    end
+    
+    it 'returns an error status if given a non valid merchant id' do
+      patch api_v1_item_path(item), params: { name: 'Snowboard', merchant_id: Merchant.last.id + 1 }
+      
+      expect(response).to have_http_status(422)
+    end
+    
+    it 'returns a valid item even when given unused attribute' do
+      old_attributes = item.attributes
+      patch api_v1_item_path(item), params: { name: 'New name', unused: true }
+      
+      expect(response).to have_http_status(204)
+
+      get api_v1_item_path(item)
+      item_parsed = json_parse
+      
+      expect(item_parsed).to be_a(Hash)
+      expect(item_parsed[:data]).to be_a(Hash)
+      
+      expect(item_parsed[:data]).to have_key(:id)
+      expect(item_parsed[:data][:id]).to be_an(String)
+      
+      expect(item_parsed[:data]).to have_key(:type)
+      expect(item_parsed[:data][:type]).to eq('item')
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:name)
+      expect(item_parsed[:data][:attributes][:name]).not_to eq(old_attributes['name'])
+      expect(item_parsed[:data][:attributes][:name]).to eq('New name')
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:description)
+      expect(item_parsed[:data][:attributes][:description]).to eq(old_attributes['description'])
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:unit_price)
+      expect(item_parsed[:data][:attributes][:unit_price]).to eq(old_attributes['unit_price'])
+      
+      expect(item_parsed[:data][:attributes]).to have_key(:merchant_id)
+      expect(item_parsed[:data][:attributes][:merchant_id]).to eq(old_attributes['merchant_id'])
+    end
+  end
 end
