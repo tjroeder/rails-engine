@@ -124,9 +124,6 @@ $ rails s
     
 At this point you should be taken to the welcome page of the web-app. If you encounter any errors or have not reached the web-app please confirm you followed the steps above and that your environment is properly set up.
 
-## Heroku Deployment
-- The deployment to Heroku can be found [here](https://bulkdiscounts.herokuapp.com/)
-
 ## **Contributor** ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
