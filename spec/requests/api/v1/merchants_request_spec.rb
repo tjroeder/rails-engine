@@ -70,7 +70,7 @@ RSpec.describe 'Merchants API', type: :request do
       expect(response).to have_http_status(200)
     end
 
-    it 'returns a list of all merchants' do
+    it 'returns a merchants data' do
       merchant = create(:merchant)
       get api_v1_merchant_path(merchant)
       merch_parsed = json_parse
