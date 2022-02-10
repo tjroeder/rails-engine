@@ -59,7 +59,7 @@ RSpec.describe 'Merchant Items API', type: :request do
 
     it 'returns merchant not found if it does not exist' do
       last_merchant = Merchant.last
-      get api_v1_merchant_items_path( last_merchant.id + 1)
+      get api_v1_merchant_items_path(last_merchant.id + 1)
       
       expect(response).to have_http_status(404)
     end
