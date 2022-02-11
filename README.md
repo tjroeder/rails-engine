@@ -56,7 +56,7 @@ $ git clone https://github.com/tjroeder/rails-engine.git
 Once cloned, you'll have a new local copy in the directory you ran the clone command in.
 
 2. Change to the project directory:<br>
-In terminal, use `$cd` to navigate to the Bulk Discounts project directory.
+In terminal, use `$cd` to navigate to the Rails Engine project directory.
 
 ```shell
 $ cd rails-engine
