@@ -277,31 +277,43 @@ RSpec.describe 'Items API', type: :request do
   end
 
   describe '#destroy action' do
-    let!(:item) { create(:item) }
+    let!(:item1) { create(:item) }
+    let!(:item2) { create(:item) }
+    let!(:invoice_items) { create_list(:invoice_item, 3, item: item1) }
+    let!(:invoice) { invoice_items[1].invoice }
+    let!(:invoice_item) { create(:invoice_item, item: item2, invoice: invoice) }
 
     it 'returns a successful status when deleted' do
-      delete api_v1_item_path(item)
+      delete api_v1_item_path(item1)
       
       expect(response).to have_http_status(204)
     end
+
+    it 'returns no json body' do
+      delete api_v1_item_path(item1)
+      
+      expect(response.body).to be_empty
+    end
     
     it 'returns no item at previous id when deleted' do
-      delete api_v1_item_path(item)
-      get api_v1_item_path(item)
+      delete api_v1_item_path(item1)
+      get api_v1_item_path(item1)
 
       expect(response).to have_http_status(404)
     end
-    
-    it 'returns an error status if given attribute with incorrect type' do
-      patch api_v1_item_path(item), params: { unit_price: 'price' }
-      
-      expect(response).to have_http_status(422)
+
+    it 'deletes any invoice items associated with the item' do
+      expect(InvoiceItem.count).to eq(4)
+
+      delete api_v1_item_path(item1)
+      expect(InvoiceItem.count).to eq(1)
     end
-    
-    it 'returns an error status if given a non valid merchant id' do
-      patch api_v1_item_path(item), params: { name: 'Snowboard', merchant_id: Merchant.last.id + 1 }
-      
-      expect(response).to have_http_status(422)
+
+    it 'deletes any invoices which only have the deleted item' do
+      expect(Invoice.count).to eq(3)
+
+      delete api_v1_item_path(item1)
+      expect(Invoice.count).to eq(1)
     end
   end
 end
