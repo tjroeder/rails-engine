@@ -70,6 +70,20 @@ RSpec.describe 'Merchants API', type: :request do
       expect(response).to have_http_status(200)
     end
 
+    it 'returns a unsuccessful status if not found' do
+      merchant = create(:merchant)
+      get api_v1_merchant_path(merchant.id + 1)
+
+      expect(response).to have_http_status(404)
+    end
+
+    it 'returns a unsuccessful status if given string for merchant id' do
+      merchant = create(:merchant)
+      get api_v1_merchant_path('string')
+
+      expect(response).to have_http_status(404)
+    end
+
     it 'returns a merchants data' do
       merchant = create(:merchant)
       get api_v1_merchant_path(merchant)
