@@ -119,10 +119,26 @@ Finally, in order to use the web app you will have to start the server locally a
 $ rails s
 ```
 
-- Open web browser and visit link
+- Open web browser and visit link base before testing end points.
     http://localhost:3000/
-    
-At this point you should be taken to the welcome page of the web-app. If you encounter any errors or have not reached the web-app please confirm you followed the steps above and that your environment is properly set up.
+
+## Endpoints
+### Merchants:
+- get all merchants - `GET /api/v1/merchants`
+- get one merchant - `GET /api/v1/merchants/:id`
+- get all items for a given merchant ID - `GET /api/v1/merchants/:merchant_id/items`
+- find one merchant by name fragment - `GET /api/vi/merchants/find?name=`
+### Items:
+- get all items - `GET /api/v1/items`
+- get one item - `GET /api/v1/items/:id`
+- create an item - `POST /api/v1/items`
+- edit an item - `PATCH /api/v1/items/:id`
+- delete an item - `DELETE /api/v1/items/:id`
+- get the merchant data for a given item ID - `GET /api/v1/items/:item_id/merchant`
+- find all items by name fragment - `GET /api/vi/items/find_all?name=`
+- find all items by max price - `GET /api/vi/items/find_all?max_price=`
+- find all items by min price - `GET /api/vi/items/find_all?min_price=`    
+- find all items by max and min price - `GET /api/vi/items/find_all?max_price=4.00&min_price=8.00`
 
 ## **Contributor** ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
