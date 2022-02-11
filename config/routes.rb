@@ -7,7 +7,7 @@ Rails.application.routes.draw do
           get 'find', to: 'search#find', on: :collection
         end
       end
-      
+
       resources :items do
         scope module: :items do
           resources :merchant, only: [:index]
