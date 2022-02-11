@@ -63,5 +63,11 @@ RSpec.describe 'Merchant Items API', type: :request do
       
       expect(response).to have_http_status(404)
     end
+
+    it 'returns a unsuccessful status if given string for merchant id' do
+      merchant = create(:merchant)
+      get api_v1_merchant_items_path('string')
+      expect(response).to have_http_status(404)
+    end
   end
 end
