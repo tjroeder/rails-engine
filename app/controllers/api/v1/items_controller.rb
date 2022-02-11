@@ -23,15 +23,15 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    if @item.update!(item_params)
-      json_string = ItemSerializer.new(@item)
-      json_response(json_string)
-    else
-      json_response(@item, :not_found)
-    end
+    @item.update!(item_params)
+    json_string = ItemSerializer.new(@item)
+    json_response(json_string)
   end
 
   def destroy
+    @item.invoices.each do |invoice|
+      invoice.destroy if invoice.invoice_items.count == 1
+    end
     @item.destroy
     head :no_content
   end
