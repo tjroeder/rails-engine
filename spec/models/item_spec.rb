@@ -3,6 +3,8 @@ require 'rails_helper'
 RSpec.describe Item, type: :model do
   describe 'associations' do
     it { should belong_to :merchant }
+    it { should have_many :invoice_items }
+    it { should have_many(:invoices).through(:invoice_items) }
   end
 
   describe 'validations' do
@@ -73,4 +75,31 @@ RSpec.describe Item, type: :model do
       end
     end
   end
+
+  # describe 'instance methods' do
+  #   describe '#destroy_empty_invoice' do
+  #     it 'destroys the invoice_item after destroying the item' do
+  #       item = create(:item)
+  #       invoice_items = create_list(:invoice_item, 3, item: item)
+  #       invoice1 = invoice_items[0].invoice
+  #       invoice2 = invoice_items[1].invoice
+  #       invoice3 = invoice_items[2].invoice
+  #       invoice_item = create(:invoice_item, invoice: invoice2)
+        
+
+  #       expect(item).to be_present
+  #       expect(invoice1).to be_present
+  #       expect(invoice2).to be_present
+  #       expect(invoice3).to be_present
+  #       require 'pry'; binding.pry
+  #       item.destroy
+
+  #       expect{ Item.find(item.id) }.to raise_error
+  #       expect{ InvoiceItem.find(item.invoice_items) }.to raise_error
+  #       # expect(item).not_to be_present
+  #       # expect(invoice_item).not_to be_present
+  #       # expect(invoice).not_to be_present
+  #     end
+  #   end
+  # end
 end
