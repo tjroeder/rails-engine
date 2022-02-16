@@ -1,8 +1,8 @@
 class MerchantNameRevenueSerializer
   include JSONAPI::Serializer
-  attributes :name
+  attribute :name
 
-  attributes :revenue do |obj|
+  attribute :revenue do |obj|
     obj.total_revenue
   end
 end
